@@ -1,14 +1,14 @@
-FROM node:16-alpine AS builder
-WORKDIR /server
+FROM node:16.20.1-bullseye AS builder
+WORKDIR /app
 COPY . .
 # RUN npm install
 RUN npm ci
 RUN npm run build
 
 
-FROM node:16-alpine AS final
-WORKDIR /server
-COPY --from=builder ./server/server ./server
+FROM node:16.20.1-bullseye AS final
+WORKDIR /app
+COPY --from=builder /app/server ./server
 COPY package.json package-lock.json config.js index.js ./
 RUN npm ci --omit=dev
 
@@ -22,8 +22,14 @@ ENV BIND_IP '0.0.0.0'
 # ENV LIST_ADD_MUSIC_LOCATION_TYPE 'top'
 # ENV LX_USER_user1 '123.123'
 # ENV LX_USER_user2 '{ "password": "123.456", "maxSnapshotNum": 10, "list.addMusicLocationType": "top" }'
-# ENV CONFIG_PATH '/server/config.js'
-# ENV LOG_PATH '/server/logs'
-# ENV DATA_PATH '/server/data'
+# ENV CONFIG_PATH '/app/config.js'
+# ENV LOG_PATH '/app/logs'
+# ENV DATA_PATH '/app/data'
 
-CMD [ "npm", "start" ]
+
+COPY docker-entrypoint.sh /docker-entrypoint.sh
+RUN chmod +x /docker-entrypoint.sh
+
+ENTRYPOINT [ "/docker-entrypoint.sh", "docker-entrypoint.sh" ]
+
+CMD su node -c "npm start"

@@ -1,0 +1,16 @@
+version: '3.8'
+
+services:
+  app:
+    build:
+      context: .
+    image: lx-music-sync-server:latest
+    volumes:
+      - ./config.js:/app/config.js
+      - ./data:/app/data
+      - ./logs:/app/logs
+    # command: sleep infinity
+    ports:
+      - 9527:9527
+    env_file:
+      - .env
